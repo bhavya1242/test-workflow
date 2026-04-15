@@ -2,12 +2,12 @@ name: Treasure Data Workflow - Test & Validate
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, td-test ]
     paths:
       - 'workflow/**'
       - '.github/workflows/td-workflow-test.yml'
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, td-test ]
     paths:
       - 'workflow/**'
   workflow_dispatch:   # Allows manual trigger from GitHub UI
