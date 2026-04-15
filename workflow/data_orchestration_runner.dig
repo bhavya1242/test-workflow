@@ -1,0 +1,31 @@
+# timezone: Asia/Dubai
+# schedule:
+#   daily>: 04:30:00
+
+_export:
+  !include : config/enviroment.yml
+
+
+
++staging_task:
+  require>: stage_runner
+  project_name: global_staging_${env}
+
++unification_task:
+  require>: custom_unification_batch
+  project_name: custom_unification_batch_${env}
+
++golden_data_creation:
+  require>: golden_runner
+  project_name: global_golden_${env}
+
++ps_runner_prod:
+  if>: ${env== "prod"}
+  _do: 
+    +ps_refresh:
+      require>: ps_refresh
+      project_name: ps_automation
+      params:
+        ps_type: ''
+        td_market: ''   
+        td_brand: ''
