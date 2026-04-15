@@ -1,0 +1,65 @@
+name: Treasure Data Workflow - Deploy Dev & Prod
+
+on:
+  push:
+    branches: [ dev, prod ]
+    paths:
+      - 'workflow/**'
+      - 'config/**'
+
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install TD Toolbelt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby-full build-essential
+          sudo gem install td --no-document
+          td --version
+
+      - name: Validate workflow
+        run: |
+          echo "Validating CDP workflow files..."
+          ls -la workflows/ config/
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/prod'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install TD Toolbelt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby-full build-essential
+          sudo gem install td --no-document
+
+      - name: Set Environment Variables
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            echo "TD_PROJECT=your-company-cdp-dev" >> $GITHUB_ENV
+            echo "ENVIRONMENT=dev" >> $GITHUB_ENV
+          else
+            echo "TD_PROJECT=your-company-cdp-prod" >> $GITHUB_ENV
+            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+          fi
+
+      - name: Deploy to Treasure Data
+        env:
+          TD_API_KEY: ${{ secrets.TD_MASTER_APIKEY }}
+        run: |
+          echo "🚀 Deploying to ${ENVIRONMENT} → Project: ${TD_PROJECT}"
+
+          td workflow push ${TD_PROJECT} \
+            --directory ./workflows \
+            --revision ${{ github.sha }}
+
+          echo "Deployment completed successfully to ${ENVIRONMENT}"
