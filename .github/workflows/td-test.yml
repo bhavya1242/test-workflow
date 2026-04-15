@@ -4,12 +4,12 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      - 'workflows/**'
+      - 'workflow/**'
       - '.github/workflows/td-workflow-test.yml'
   pull_request:
     branches: [ main, master ]
     paths:
-      - 'workflows/**'
+      - 'workflow/**'
   workflow_dispatch:   # Allows manual trigger from GitHub UI
 
 jobs:
@@ -36,7 +36,7 @@ jobs:
           echo "Validating Treasure Workflow files..."
           #TD test without auth
           td workflow push test-validation-project \
-            --directory ./workflows \
+            --directory ./workflow \
             --revision ${{ github.sha }} \
             --dry-run || echo "Dry-run not fully supported - proceeding with basic check"
           
@@ -47,4 +47,4 @@ jobs:
           echo "Repository: ${{ github.repository }}"
           echo "Branch: ${{ github.ref }}"
           echo "Commit: ${{ github.sha }}"
-          ls -R ./workflows
+          ls -R ./workflow
